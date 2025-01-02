@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
+        "esModuleInterop": true,
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ]
+        }
+    }
+}
