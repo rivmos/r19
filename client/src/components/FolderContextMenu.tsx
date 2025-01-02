@@ -2,7 +2,6 @@ import { IFolder } from '@/@types/explorer';
 import { apiDeleteFolder } from '@/services/FolderService';
 import { useAppDispatch } from '@/store';
 import { setRenaming } from '@/store/slices/doc.data';
-import React from 'react'
 import { MdDeleteOutline, MdOutlineDriveFileRenameOutline } from "react-icons/md";
 
 const FolderContextMenu = ({ contextMenu }: { contextMenu }) => {

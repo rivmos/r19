@@ -49,8 +49,8 @@ const NewFolder = () => {
             >
                 {
                     (props) => (
-                        <Form className='-mt-2'>
-                            <Field id="name" name="name" onBlur={props.submitForm} ref={inputRef} placeholder="" className="w-12 h-3 !p-1 bg-indigo-400 text-white rounded-xl focus:border-0 focus:ring-0 focus:outline-none text-xs" autoComplete="off" />
+                        <Form className='flex'>
+                            <Field id="name" name="name" onBlur={props.submitForm} ref={inputRef} placeholder="" className="w-12 h-4 !p-1 bg-indigo-400 text-white rounded-md focus:border-0 focus:ring-0 focus:outline-none text-xs" autoComplete="off" />
                             <button type="submit" className='hidden'>Submit</button>
                         </Form>
                     )
