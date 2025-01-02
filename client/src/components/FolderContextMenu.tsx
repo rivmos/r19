@@ -1,7 +1,7 @@
 import { IFolder } from '@/@types/explorer';
 import { apiDeleteFolder } from '@/services/FolderService';
 import { useAppDispatch } from '@/store';
-import { setRenaming } from '@/store/slices/doc.data';
+import { deleteFolder, setRenaming } from '@/store/slices/doc.data';
 import { MdDeleteOutline, MdOutlineDriveFileRenameOutline } from "react-icons/md";
 
 const FolderContextMenu = ({ contextMenu }: { contextMenu }) => {
@@ -11,10 +11,19 @@ const FolderContextMenu = ({ contextMenu }: { contextMenu }) => {
     const handleRename = () => {
         dispatch(setRenaming(true))
     }
-
+    
     const handleDelete = async () => {
-        const res = await apiDeleteFolder<IFolder, { id: string }>({ id: contextMenu.id });
-    }
+        try {
+            const res = await apiDeleteFolder<IFolder, { id: string }>({ id: contextMenu.itemId });
+            if (res) {
+                console.log('Folder deleted successfully:', res);
+                dispatch(deleteFolder(contextMenu.itemId))
+            }
+        } catch (error) {
+            console.error('Error deleting folder:', error);
+        }
+    };
+    
 
     return (
         <div

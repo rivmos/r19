@@ -60,12 +60,13 @@ router.post('/', async (req: Request, res: Response): Promise<any> => {
     }
 });
 
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/', async (req: Request, res: Response) => {
 
-    const { id } = req.body;
+    const { id } = req.query;
 
     try {
-        const deletedFolder = await Folder.deleteOne({ id }); // Adjust field name if necessary
+        const deletedFolder = await Folder.deleteOne({ _id: id }); // Adjust field name
+
         if (deletedFolder.deletedCount > 0) {
             res.status(200).json({ message: 'Folder deleted successfully' });
         } else {

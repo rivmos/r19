@@ -23,7 +23,7 @@ const View = () => {
 
 
     return (
-        <div className={classNames("p-4 h-screen", { 'p-0' : view === 'list' })}>
+        <div className={classNames("p-4 h-screen", { '!p-0' : view === 'list' })}>
         <div
           className={classNames(
             "flex gap-2 flex-wrap",

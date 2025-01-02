@@ -20,6 +20,6 @@ export const apiDeleteFolder = async <T, U extends Record<string, unknown>>(data
     return ApiService.fetchData<T>({
         method: 'delete',
         url: '/folders',
-        data
+        params:data
     })
 }
