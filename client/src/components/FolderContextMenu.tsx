@@ -1,12 +1,15 @@
 import { IFolder } from '@/@types/explorer';
 import { apiDeleteFolder } from '@/services/FolderService';
 import { useAppDispatch } from '@/store';
-import { deleteFolder, setRenaming } from '@/store/slices/doc.data';
-import { MdDeleteOutline, MdOutlineDriveFileRenameOutline } from "react-icons/md";
+import { deleteFolder, setCurrentFolder, setRenaming } from '@/store/slices/doc.data';
+import { MdDeleteOutline, MdOutlineDriveFileRenameOutline, MdFolderOpen } from "react-icons/md";
 
 const FolderContextMenu = ({ contextMenu }: { contextMenu }) => {
-
     const dispatch = useAppDispatch()
+
+    const handleOpen = () => {
+        dispatch(setCurrentFolder(contextMenu.itemId))
+    }
 
     const handleRename = () => {
         dispatch(setRenaming(true))
@@ -24,7 +27,6 @@ const FolderContextMenu = ({ contextMenu }: { contextMenu }) => {
         }
     };
     
-
     return (
         <div
             className="fixed bg-white flex flex-col gap-1 rounded-lg shadow-xl border border-gray-100 
@@ -35,6 +37,18 @@ const FolderContextMenu = ({ contextMenu }: { contextMenu }) => {
                 left: contextMenu.x,
             }}
         >
+            <button
+                onClick={handleOpen}
+                className="w-full flex items-center space-x-3 
+                 text-gray-700 hover:bg-gray-50 transition-colors 
+                 duration-150"
+            >
+                <MdFolderOpen className="w-4 h-4 text-blue-500" />
+                <span className="text-sm">Open</span>
+            </button>
+
+            <div className="h-px bg-gray-100 mx-3" />
+
             <button
                 onClick={handleRename}
                 className="w-full flex items-center space-x-3 

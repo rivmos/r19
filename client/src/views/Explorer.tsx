@@ -6,8 +6,8 @@ const Explorer = () => {
     return (
         <>
             <Toolbar />
-            <View />
             <History />
+            <View />
         </>
     )
 }

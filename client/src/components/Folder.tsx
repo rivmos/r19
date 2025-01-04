@@ -4,7 +4,7 @@ import { Field, Form, Formik } from "formik";
 import { useEffect, useRef } from "react";
 import { PiFolderSimpleThin, PiFolderSimpleFill } from "react-icons/pi";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setRenaming, setSelectedFolder, updateFolder, useSelectedFolder } from '@/store/slices/doc.data';
+import { setCurrentFolder, setRenaming, setSelectedFolder, updateFolder, useCurrentFolder, useSelectedFolder } from '@/store/slices/doc.data';
 import { apiCreateOrUpdateFolder } from '@/services/FolderService';
 import { trimString } from '@/utils/helper/string';
 
@@ -14,6 +14,7 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
 
     const inputRef = useRef<HTMLInputElement>(null);
     const selectedFolder = useAppSelector(useSelectedFolder)
+    const currentFolder = useAppSelector(useCurrentFolder)
     const view = useAppSelector(state => state.appSetting.view)
     const isRenaming = useAppSelector(state => state.docData.isRenaming)
     const isSelected = selectedFolder === folder.id
@@ -28,9 +29,18 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
         size: view === 'grid' ? 36 : 12
     }
 
+    const handleDblClick = () => {
+        dispatch(setCurrentFolder(folder.id));
+    }
+
+    const handleClick = () => {
+        if(isSelected) return
+        dispatch(setSelectedFolder(folder.id));
+    }
+
 
     return (
-        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, folder.id)} onClick={() => dispatch(setSelectedFolder(folder.id))}>
+        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, folder.id)} onClick={handleClick} onDoubleClick={handleDblClick}>
             {isSelected ? <PiFolderSimpleFill size={iconConfig.size} className="text-indigo-500" /> : <PiFolderSimpleThin size={iconConfig.size} className="text-indigo-500" />}
             {(isRenaming && isSelected) ?
                 <Formik
@@ -38,7 +48,11 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
                         name: folder.name
                     }}
                     onSubmit={async (values) => {
-                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: null, id: folder.id });
+                        if(folder.name === values.name) {
+                            dispatch(setRenaming(false));
+                            return;
+                        };                        ;
+                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder, id: folder.id });
                         if (res.data) {
                             dispatch(updateFolder(res.data));
                             dispatch(setRenaming(false));

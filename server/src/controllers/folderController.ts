@@ -1,5 +1,7 @@
 import express, { Request, Response } from 'express';
 import Folder from "../models/Folder";
+import { uploadFile } from '../utils/multer.config';
+import { MulterError } from 'multer';
 
 const router = express.Router();
 
@@ -11,6 +13,7 @@ interface FolderRequest extends Request {
 
 
 router.get('/', async (req: FolderRequest, res: Response): Promise<any> => {
+
     const { parentId } = req.query;
 
     try {
@@ -33,6 +36,7 @@ router.get('/:id', async (req: FolderRequest, res: Response): Promise<any> => {
 })
 
 router.post('/', async (req: Request, res: Response): Promise<any> => {
+
     const { id, name, parentId } = req.body;
 
     try {
@@ -77,6 +81,5 @@ router.delete('/', async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Error deleting folder', error });
     }
 });
-
 
 export default router

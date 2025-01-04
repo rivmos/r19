@@ -9,8 +9,9 @@ export interface IInitialState {
     isRenaming: boolean,
     isCreatingFolder: boolean,
     folders: IFolder[],
+    history: string[],
     selectedFolder: string | null,
-    currentFolder: string | null
+    currentFolder: string | null,
 }
 
 const initialState: IInitialState = {
@@ -18,12 +19,13 @@ const initialState: IInitialState = {
     isRenaming: false,
     isCreatingFolder: false,
     folders: [],
+    history: [],
     selectedFolder: null,
-    currentFolder: null
+    currentFolder: null,
 }
 
-export const getAllFolders = createAsyncThunk('getAllFolders', async () => {
-    const res = await apiGetAllFolders<IFolder[]>()
+export const getAllFolders = createAsyncThunk('getAllFolders', async (parentId: string) => {
+    const res = await apiGetAllFolders<IFolder[], { parentId: string }>({ parentId })
     return res.data
 })
 
@@ -46,14 +48,17 @@ const appSettingSlice = createSlice({
         setIsCreatingFolder(state, action) {
             state.isCreatingFolder = action.payload;
         },
-        addNewFolder(state, action:PayloadAction<IFolder>) {
+        addNewFolder(state, action: PayloadAction<IFolder>) {
             state.folders.push(action.payload)
         },
-        updateFolder(state, action: PayloadAction<IFolder>){
+        updateFolder(state, action: PayloadAction<IFolder>) {
             state.folders = state.folders.map(folder => folder.id === action.payload.id ? action.payload : folder)
         },
         deleteFolder(state, action: PayloadAction<string>) {
             state.folders = state.folders.filter(folder => folder.id != action.payload)
+        },
+        setHistory(state, action) {
+            state.history = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -68,10 +73,10 @@ const appSettingSlice = createSlice({
     }
 })
 
-export const { setFolders, setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder } = appSettingSlice.actions;
+export const { setFolders, setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setHistory } = appSettingSlice.actions;
 
 export const useFolders = (state: RootState) => state.docData.folders;
-export const useSelectedFolder = (state:RootState) => state.docData.selectedFolder;
-export const useCurrentFolder = (state:RootState) => state.docData.currentFolder;
+export const useSelectedFolder = (state: RootState) => state.docData.selectedFolder;
+export const useCurrentFolder = (state: RootState) => state.docData.currentFolder;
 
 export default appSettingSlice.reducer;

@@ -1,7 +1,10 @@
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setView } from "@/store/slices/app.setting";
+import { setIsUploading, setView } from "@/store/slices/app.setting";
 import { setIsCreatingFolder, setSelectedFolder } from "@/store/slices/doc.data";
 import { CiSettings, CiCircleList, CiGrid41, CiFolderOn } from "react-icons/ci";
+import { PiUploadThin } from "react-icons/pi";
+import { VscNewFolder } from "react-icons/vsc";
+import { MdOutlineCreateNewFolder } from "react-icons/md";
 
 const Toolbar = () => {
   const dispatch = useAppDispatch();
@@ -16,10 +19,14 @@ const Toolbar = () => {
     dispatch(setSelectedFolder(null));
   };
 
+  const handleUpload = () => {
+    dispatch(setIsUploading(true));
+  };
+
   return (
     <div className="w-full bg-gray-50 border-b-[1px] px-2 sm:px-4 py-2">
-      {/* Right section */}
       <div className="flex items-center justify-between sm:justify-end space-x-2">
+        
         {/* Toggle View Button */}
         <button
           onClick={toggleView}
@@ -33,12 +40,13 @@ const Toolbar = () => {
           )}
         </button>
 
-        {/* Settings Button */}
+        {/* Upload Button */}
         <button
           className="flex items-center hover:bg-indigo-50 p-1 w-8 h-8 justify-center rounded-md"
-          aria-label="Settings"
+          aria-label="Upload"
+          onClick={handleUpload}
         >
-          <CiSettings className="h-5 w-5" />
+          <PiUploadThin className="h-5 w-5" />
         </button>
 
         {/* Create New Folder Button */}
@@ -47,8 +55,15 @@ const Toolbar = () => {
           aria-label="Create new folder"
           onClick={handleCreateNewFolder}
         >
-          <CiFolderOn className="h-5 w-5" />
-          <span className="hidden sm:inline-block sm:ml-1">+</span>
+          <VscNewFolder className="h-5 w-5" />
+        </button>
+
+        {/* Settings Button */}
+        <button
+          className="flex items-center hover:bg-indigo-50 p-1 w-8 h-8 justify-center rounded-md"
+          aria-label="Settings"
+        >
+          <CiSettings className="h-5 w-5" />
         </button>
       </div>
     </div>
