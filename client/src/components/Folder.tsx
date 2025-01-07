@@ -7,8 +7,9 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { setCurrentFolder, setRenaming, setSelectedFolder, updateFolder, useCurrentFolder, useSelectedFolder } from '@/store/slices/doc.data';
 import { apiCreateOrUpdateFolder } from '@/services/FolderService';
 import { trimString } from '@/utils/helper/string';
+import { IContextMenu } from '@/@types/explorer';
 
-const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e: React.MouseEvent, id: string) => void }) => {
+const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e: React.MouseEvent, item: IContextMenu['item']) => void }) => {
 
     const dispatch = useAppDispatch();
 
@@ -30,7 +31,7 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
     }
 
     const handleDblClick = () => {
-        dispatch(setCurrentFolder(folder.id));
+        dispatch(setCurrentFolder(folder));
     }
 
     const handleClick = () => {
@@ -40,7 +41,7 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
 
 
     return (
-        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, folder.id)} onClick={handleClick} onDoubleClick={handleDblClick}>
+        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, {id: folder.id, type: 'folder'})} onClick={handleClick} onDoubleClick={handleDblClick}>
             {isSelected ? <PiFolderSimpleFill size={iconConfig.size} className="text-indigo-500" /> : <PiFolderSimpleThin size={iconConfig.size} className="text-indigo-500" />}
             {(isRenaming && isSelected) ?
                 <Formik
@@ -52,7 +53,7 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
                             dispatch(setRenaming(false));
                             return;
                         };                        ;
-                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder, id: folder.id });
+                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder.id, id: folder.id });
                         if (res.data) {
                             dispatch(updateFolder(res.data));
                             dispatch(setRenaming(false));
@@ -68,7 +69,7 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
                         )
                     }
                 </Formik> :
-                <span className={classNames("text-xs rounded-xl px-2")}>
+                <span className={classNames("text-xs rounded-xl")}>
                     {view === 'grid' ? trimString(folder.name) : folder.name}
                 </span>
             }

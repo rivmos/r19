@@ -1,13 +1,7 @@
+import { IContextMenu } from '@/@types/explorer';
 import { useAppDispatch } from '@/store';
 import { setSelectedFolder } from '@/store/slices/doc.data';
 import React, { useEffect, useState } from 'react'
-
-interface IContextMenu {
-    x: number,
-    y: number,
-    show: boolean;
-    itemId: string | null;
-}
 
 const useContextMenu = () => {
 
@@ -17,18 +11,21 @@ const useContextMenu = () => {
         show: false,
         x: 0,
         y: 0,
-        itemId: null
+        item: {
+          id: null,
+          type: 'folder'
+        },
     })
 
-    const handleContextMenu = (e: React.MouseEvent, id: string) => {
+    const handleContextMenu = (e: React.MouseEvent, item: IContextMenu['item']) => {
         e.preventDefault();
         setContextMenu({
           x: e.pageX,
           y: e.pageY,
           show: true,
-          itemId: id
+          item: item
         });
-        dispatch(setSelectedFolder(id))
+        // dispatch(setSelectedFolder(item.id))
       };
 
     useEffect(() => {

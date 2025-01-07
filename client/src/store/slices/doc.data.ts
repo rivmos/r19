@@ -1,17 +1,18 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../storeSetup";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { apiGetAllFolders } from "@/services/FolderService";
-import { IFolder } from "@/@types/explorer";
+import { IFile, IFolder } from "@/@types/explorer";
+import { apiGetExplorer } from "@/services/ExplorerService";
 
 export interface IInitialState {
     loading: boolean,
     isRenaming: boolean,
     isCreatingFolder: boolean,
     folders: IFolder[],
-    history: string[],
+    files: IFile[],
+    history: IFolder[],
     selectedFolder: string | null,
-    currentFolder: string | null,
+    currentFolder: IFolder,
 }
 
 const initialState: IInitialState = {
@@ -19,13 +20,19 @@ const initialState: IInitialState = {
     isRenaming: false,
     isCreatingFolder: false,
     folders: [],
-    history: [],
+    files: [],
+    history: [{ id: null, name: 'root' }],
     selectedFolder: null,
-    currentFolder: null,
+    currentFolder: { id: null, name: 'root' },
 }
 
-export const getAllFolders = createAsyncThunk('getAllFolders', async (parentId: string) => {
-    const res = await apiGetAllFolders<IFolder[], { parentId: string }>({ parentId })
+type GetExplorerResponse = {
+    folders: IFolder[];
+    files: IFile[];
+}
+
+export const getExplorer = createAsyncThunk('getExplorer', async (parentId: string) => {
+    const res = await apiGetExplorer<GetExplorerResponse, { parentId: string }>({ parentId })
     return res.data
 })
 
@@ -33,16 +40,13 @@ const appSettingSlice = createSlice({
     name: 'appSetting',
     initialState,
     reducers: {
-        setFolders(state, action: PayloadAction<IFolder[]>) {
-            state.folders = action.payload;
-        },
         setRenaming(state, action) {
             state.isRenaming = action.payload;
         },
         setSelectedFolder(state, action) {
             state.selectedFolder = action.payload;
         },
-        setCurrentFolder(state, action) {
+        setCurrentFolder(state, action: PayloadAction<IFolder>) {
             state.currentFolder = action.payload;
         },
         setIsCreatingFolder(state, action) {
@@ -63,19 +67,21 @@ const appSettingSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(getAllFolders.pending, (state, action) => {
+            .addCase(getExplorer.pending, (state, action) => {
                 state.loading = true;
             })
-            .addCase(getAllFolders.fulfilled, (state, action) => {
+            .addCase(getExplorer.fulfilled, (state, action) => {
                 state.loading = false;
-                state.folders = action.payload;
+                state.folders = action.payload.folders;
+                state.files = action.payload.files;
             })
     }
 })
 
-export const { setFolders, setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setHistory } = appSettingSlice.actions;
+export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setHistory } = appSettingSlice.actions;
 
 export const useFolders = (state: RootState) => state.docData.folders;
+export const useFiles = (state: RootState) => state.docData.files;
 export const useSelectedFolder = (state: RootState) => state.docData.selectedFolder;
 export const useCurrentFolder = (state: RootState) => state.docData.currentFolder;
 

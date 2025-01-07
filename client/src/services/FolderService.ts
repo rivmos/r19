@@ -1,13 +1,5 @@
 import ApiService from "./ApiService";
 
-export const apiGetAllFolders = async <T, U extends Record<string, unknown>>(params: U) => {
-    return ApiService.fetchData<T>({
-        method: 'get',
-        url: '/folders',
-        params
-    })
-}
-
 export const apiCreateOrUpdateFolder = async <T, U extends Record<string, unknown>>(data: U) => {
     return ApiService.fetchData<T>({
         method: 'post',
