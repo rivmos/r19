@@ -54,6 +54,8 @@ const appSettingSlice = createSlice({
         setCurrentFolder(state, action: PayloadAction<string | null>) {
             if(state.currentFolder === action.payload) return;
             state.currentFolder = action.payload;
+            const selectedFolder = state.folders.find(folder => folder.id === action.payload);
+            state.history.push(selectedFolder);
         },
         setIsCreatingFolder(state, action) {
             state.isCreatingFolder = action.payload;
