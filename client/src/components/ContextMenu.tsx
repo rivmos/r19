@@ -19,7 +19,6 @@ const ContextMenu = ({ contextMenu }: { contextMenu: IContextMenu }) => {
         try {
             const res = await apiDeleteFolder<IFolder, { id: string }>({ id: contextMenu.item.id });
             if (res) {
-                console.log('Folder deleted successfully:', res);
                 dispatch(deleteFolder(contextMenu.item.id))
             }
         } catch (error) {

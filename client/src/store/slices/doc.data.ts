@@ -26,13 +26,17 @@ const initialState: IInitialState = {
     currentFolder: { id: null, name: 'root' },
 }
 
+type GetExplorerRequest = {
+    parentId: string
+}
+
 type GetExplorerResponse = {
     folders: IFolder[];
     files: IFile[];
 }
 
 export const getExplorer = createAsyncThunk('getExplorer', async (parentId: string) => {
-    const res = await apiGetExplorer<GetExplorerResponse, { parentId: string }>({ parentId })
+    const res = await apiGetExplorer<GetExplorerResponse, GetExplorerRequest>({ parentId })
     return res.data
 })
 
@@ -53,16 +57,19 @@ const appSettingSlice = createSlice({
             state.isCreatingFolder = action.payload;
         },
         addNewFolder(state, action: PayloadAction<IFolder>) {
-            state.folders.push(action.payload)
+            state.folders.push(action.payload);
         },
         updateFolder(state, action: PayloadAction<IFolder>) {
-            state.folders = state.folders.map(folder => folder.id === action.payload.id ? action.payload : folder)
+            state.folders = state.folders.map(folder => folder.id === action.payload.id ? action.payload : folder);
         },
         deleteFolder(state, action: PayloadAction<string>) {
-            state.folders = state.folders.filter(folder => folder.id != action.payload)
+            state.folders = state.folders.filter(folder => folder.id != action.payload);
         },
         setHistory(state, action) {
             state.history = action.payload;
+        },
+        setDocFiles(state, action: PayloadAction<IFile[]>) {
+            state.files = state.files.concat(action.payload);
         }
     },
     extraReducers: (builder) => {
@@ -78,7 +85,7 @@ const appSettingSlice = createSlice({
     }
 })
 
-export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setHistory } = appSettingSlice.actions;
+export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setHistory, setDocFiles } = appSettingSlice.actions;
 
 export const useFolders = (state: RootState) => state.docData.folders;
 export const useFiles = (state: RootState) => state.docData.files;

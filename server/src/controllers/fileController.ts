@@ -45,8 +45,7 @@ router.post('/upload', uploadFile.array('files[]'), async (req, res) => {
   
       res.status(200).json({
         message: 'Files uploaded successfully',
-        files: req.files,
-        savedFiles,
+        files: savedFiles,
       });
     } catch (error) {
         console.error('Upload Error:', error); // Log the full error to the console

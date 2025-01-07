@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setIsUploading, useIsUploading } from "@/store/slices/app.setting";
-import { useCurrentFolder } from "@/store/slices/doc.data";
+import { setDocFiles, useCurrentFolder } from "@/store/slices/doc.data";
 import { PiUploadThin } from "react-icons/pi";
 import { VscClose } from "react-icons/vsc";
 import { apiUploadFile } from "@/services/FolderService";
+import { IFile } from "@/@types/explorer";
 
 const FileUploader = () => {
   const dispatch = useAppDispatch();
@@ -63,10 +64,10 @@ const FileUploader = () => {
   };
 
   const handleUpload = async () => {
-    const res = await apiUploadFile({ parentId: currentFolder.id, files: files });
+    const res = await apiUploadFile<{ message: string, files: IFile[] }, { parentId: string, files: File[] }>({ parentId: currentFolder.id, files: files });
     if (res) {
-      console.log(res.data)
       dispatch(setIsUploading(false));
+      dispatch(setDocFiles(res.data.files));
     }
   }
 
