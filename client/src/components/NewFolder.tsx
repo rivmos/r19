@@ -39,7 +39,7 @@ const NewFolder = () => {
                         dispatch(setIsCreatingFolder(false));
                         return;
                     }
-                    const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder.id });
+                    const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder });
                     if (res.data) {
                         dispatch(addNewFolder(res.data));
                         dispatch(setIsCreatingFolder(false));

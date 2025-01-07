@@ -1,18 +1,19 @@
 import { IContextMenu, IFolder } from '@/@types/explorer';
 import { apiDeleteFolder } from '@/services/FolderService';
 import { useAppDispatch } from '@/store';
-import { deleteFolder, setCurrentFolder, setRenaming } from '@/store/slices/doc.data';
+import { deleteFolder, setCurrentFolder, setRenaming, setSelectedFolder } from '@/store/slices/doc.data';
 import { MdDeleteOutline, MdOutlineDriveFileRenameOutline, MdFolderOpen } from "react-icons/md";
 
 const ContextMenu = ({ contextMenu }: { contextMenu: IContextMenu }) => {
     const dispatch = useAppDispatch()
 
-    // const handleOpen = () => {
-    //     dispatch(setCurrentFolder(contextMenu.item))
-    // }
+    const handleOpen = () => {
+        dispatch(setCurrentFolder(contextMenu.item.id));
+    }
 
     const handleRename = () => {
-        dispatch(setRenaming(true))
+        dispatch(setRenaming(true));
+        dispatch(setSelectedFolder(contextMenu.item.id));
     }
     
     const handleDelete = async () => {
@@ -37,7 +38,7 @@ const ContextMenu = ({ contextMenu }: { contextMenu: IContextMenu }) => {
             }}
         >
             <button
-                // onClick={handleOpen}
+                onClick={handleOpen}
                 className="w-full flex items-center space-x-3 
                  text-gray-700 hover:bg-gray-50 transition-colors 
                  duration-150"

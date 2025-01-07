@@ -31,7 +31,7 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
     }
 
     const handleDblClick = () => {
-        dispatch(setCurrentFolder(folder));
+        dispatch(setCurrentFolder(folder.id));
     }
 
     const handleClick = () => {
@@ -52,7 +52,7 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
                             dispatch(setRenaming(false));
                             return;
                         };                        ;
-                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder.id, id: folder.id });
+                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder, id: folder.id });
                         if (res.data) {
                             dispatch(updateFolder(res.data));
                             dispatch(setRenaming(false));

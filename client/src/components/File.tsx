@@ -65,7 +65,7 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
                             dispatch(setRenaming(false));
                             return;
                         };                        ;
-                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder.id, id: file.id });
+                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder, id: file.id });
                         if (res.data) {
                             dispatch(updateFolder(res.data));
                             dispatch(setRenaming(false));

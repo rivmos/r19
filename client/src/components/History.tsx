@@ -10,7 +10,7 @@ const History = () => {
     const dispatch = useAppDispatch()
     const history = useAppSelector(state => state.docData.history);
 
-    const handleClick = (item:IFolder) => {
+    const handleClick = (item:string | null) => {
         dispatch(setCurrentFolder(item));
     }
     
@@ -19,7 +19,7 @@ const History = () => {
             {
                 history.map(item => {
                     return (
-                        <span onClick={() => handleClick(item)} key={item.id} className="text-sm text-gray-500 font-medium space-x-1 flex items-center cursor-pointer">
+                        <span onClick={() => handleClick(item.id)} key={item.id} className="text-sm text-gray-500 font-medium space-x-1 flex items-center cursor-pointer">
                             <CiCircleChevRight className="inline-block h-4 w-4 text-gray-400" />
                             <PiFolderSimpleFill size={12} className="text-indigo-500" />
                             <span>{item.name}</span>

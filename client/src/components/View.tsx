@@ -25,7 +25,7 @@ const View = () => {
   const { contextMenu, handleContextMenu } = useContextMenu();
 
   useEffect(() => {
-    dispatch(getExplorer(currentFolder.id));
+    dispatch(getExplorer(currentFolder));
   }, [currentFolder]);
 
   return (

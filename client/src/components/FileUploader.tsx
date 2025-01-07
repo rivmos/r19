@@ -64,7 +64,7 @@ const FileUploader = () => {
   };
 
   const handleUpload = async () => {
-    const res = await apiUploadFile<{ message: string, files: IFile[] }, { parentId: string, files: File[] }>({ parentId: currentFolder.id, files: files });
+    const res = await apiUploadFile<{ message: string, files: IFile[] }, { parentId: string, files: File[] }>({ parentId: currentFolder, files: files });
     if (res) {
       dispatch(setIsUploading(false));
       dispatch(setDocFiles(res.data.files));

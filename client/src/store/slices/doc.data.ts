@@ -12,7 +12,7 @@ export interface IInitialState {
     files: IFile[],
     history: IFolder[],
     selectedFolder: string | null,
-    currentFolder: IFolder,
+    currentFolder: string | null,
 }
 
 const initialState: IInitialState = {
@@ -23,7 +23,7 @@ const initialState: IInitialState = {
     files: [],
     history: [{ id: null, name: 'root' }],
     selectedFolder: null,
-    currentFolder: { id: null, name: 'root' },
+    currentFolder: null,
 }
 
 type GetExplorerRequest = {
@@ -51,8 +51,8 @@ const appSettingSlice = createSlice({
             if(state.selectedFolder === action.payload) return
             state.selectedFolder = action.payload;
         },
-        setCurrentFolder(state, action: PayloadAction<IFolder>) {
-            if(state.currentFolder.id === action.payload.id) return;
+        setCurrentFolder(state, action: PayloadAction<string | null>) {
+            if(state.currentFolder === action.payload) return;
             state.currentFolder = action.payload;
         },
         setIsCreatingFolder(state, action) {
