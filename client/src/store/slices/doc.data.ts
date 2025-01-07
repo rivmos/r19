@@ -48,9 +48,11 @@ const appSettingSlice = createSlice({
             state.isRenaming = action.payload;
         },
         setSelectedFolder(state, action) {
+            if(state.selectedFolder === action.payload) return
             state.selectedFolder = action.payload;
         },
         setCurrentFolder(state, action: PayloadAction<IFolder>) {
+            if(state.currentFolder.id === action.payload.id) return;
             state.currentFolder = action.payload;
         },
         setIsCreatingFolder(state, action) {

@@ -35,7 +35,6 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
     }
 
     const handleClick = () => {
-        if(isSelected) return
         dispatch(setSelectedFolder(folder.id));
     }
 
