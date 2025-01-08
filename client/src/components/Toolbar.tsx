@@ -1,10 +1,9 @@
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setIsUploading, setView } from "@/store/slices/app.setting";
-import { setIsCreatingFolder, setSelectedFolder } from "@/store/slices/doc.data";
+import { setIsCreatingFolder, setSelectedFolder } from "@/store/slices/explorerSlice";
 import { CiSettings, CiCircleList, CiGrid41, CiFolderOn } from "react-icons/ci";
 import { PiUploadThin } from "react-icons/pi";
 import { VscNewFolder } from "react-icons/vsc";
-import { MdOutlineCreateNewFolder } from "react-icons/md";
 
 const Toolbar = () => {
   const dispatch = useAppDispatch();

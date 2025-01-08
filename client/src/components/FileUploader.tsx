@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setIsUploading, useIsUploading } from "@/store/slices/app.setting";
-import { setDocFiles, useCurrentFolder } from "@/store/slices/doc.data";
+import { setDocFiles, explorerSelectors } from "@/store/slices/explorerSlice";
 import { PiUploadThin } from "react-icons/pi";
 import { VscClose } from "react-icons/vsc";
 import { apiUploadFile } from "@/services/FolderService";
@@ -15,7 +15,7 @@ const FileUploader = () => {
   const [error, setError] = useState<string | null>(null);
 
   const isUploading = useAppSelector(useIsUploading);
-  const currentFolder = useAppSelector(useCurrentFolder);
+  const currentFolder = useAppSelector(explorerSelectors.useCurrentFolder);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -105,8 +105,8 @@ const FileUploader = () => {
           onDrop={handleDrop}
         >
           <div className="flex flex-col items-center gap-4">
-            <PiUploadThin className="w-16 h-16 text-gray-400" />
-            <div className="text-lg font-semibold text-gray-700">
+            <PiUploadThin className="sm:w-16 sm:h-16 w-8 h-8 text-gray-400" />
+            <div className="text-sm sm:text-lg font-semibold text-gray-700">
               Drag and drop files here
             </div>
             <div className="text-sm text-gray-500">or</div>
@@ -121,7 +121,7 @@ const FileUploader = () => {
                 multiple
               />
             </label>
-            <div className="text-sm text-gray-500">Maximum file size: 5MB</div>
+            <div className="text-xs sm:text-sm text-gray-500">Maximum file size: 5MB</div>
           </div>
         </div>
         {error && (
@@ -130,11 +130,11 @@ const FileUploader = () => {
           </div>
         )}
         {files.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4 flex flex-col gap-2 z">
             {files.map((file, index) => (
               <div
                 key={`${file.name}-${index}`}
-                className="flex items-center justify-between p-2 bg-gray-50 rounded shadow-sm"
+                className="flex items-center justify-between p-2 bg-gray-50 rounded-md shadow-sm"
               >
                 <span className="text-sm truncate">{file.name}</span>
                 <button

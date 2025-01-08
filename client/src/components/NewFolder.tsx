@@ -4,7 +4,7 @@ import { Field, Form, Formik } from "formik";
 import { useEffect, useRef } from "react";
 import { PiFolderSimpleThin, PiFolderSimpleFill } from "react-icons/pi";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { addNewFolder, setIsCreatingFolder, useCurrentFolder } from '@/store/slices/doc.data';
+import { addNewFolder, setIsCreatingFolder, explorerSelectors } from '@/store/slices/explorerSlice';
 import { apiCreateOrUpdateFolder } from '@/services/FolderService';
 
 const NewFolder = () => {
@@ -12,7 +12,7 @@ const NewFolder = () => {
     const dispatch = useAppDispatch();
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const currentFolder = useAppSelector(useCurrentFolder)
+    const currentFolder = useAppSelector(explorerSelectors.useCurrentFolder)
     const view = useAppSelector(state => state.appSetting.view)
 
     useEffect(() => {

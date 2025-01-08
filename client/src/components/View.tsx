@@ -1,7 +1,7 @@
 import { useEffect } from "react"
 import Folder from "./Folder"
 import { useAppDispatch, useAppSelector } from "@/store";
-import { getExplorer, useCurrentFolder, useFiles, useFolders } from "@/store/slices/doc.data";
+import { getExplorer, explorerSelectors } from "@/store/slices/explorerSlice";
 import useContextMenu from "@/utils/hooks/useContextMenu";
 import ContextMenu from "./ContextMenu";
 import classNames from "classnames";
@@ -15,12 +15,12 @@ const View = () => {
 
   const dispatch = useAppDispatch()
 
-  const folders = useAppSelector(useFolders);
-  const files = useAppSelector(useFiles);
+  const folders = useAppSelector(explorerSelectors.useFolders);
+  const files = useAppSelector(explorerSelectors.useFiles);
   const view = useAppSelector(state => state.appSetting.view);
-  const isCreatingFolder = useAppSelector(state => state.docData.isCreatingFolder);
+  const currentFolder = useAppSelector(explorerSelectors.useCurrentFolder);
+  const isCreatingFolder = useAppSelector(state => state.explorerSlice.isCreatingFolder);
   const isUploading = useAppSelector(useIsUploading);
-  const currentFolder = useAppSelector(useCurrentFolder);
 
   const { contextMenu, handleContextMenu } = useContextMenu();
 
@@ -36,27 +36,35 @@ const View = () => {
           { 'flex-col justify-center !gap-0': view === 'list' }
         )}
       >
+        {/* If no data and not creating new folder */}
+        {((!isCreatingFolder && isEmpty(files) && isEmpty(folders)) && <div className="flex justify-center items-center w-full h-full">This folder is empty.</div>)}
+
+        {/* mapping folders */}
         {
-          !isEmpty(folders) ?
-            folders.map((folder) => (
-              <Folder key={folder.id} folder={folder} onContextMenu={handleContextMenu} />
-            )) 
-            :
-            <div className="flex justify-center items-center w-full h-full">This folder is empty.</div>
+          folders.map((folder) => (
+            <Folder key={folder.id} folder={folder} onContextMenu={handleContextMenu} />
+          ))
         }
-      {
+
+        {/* mapping files */}
+        {
           files.map((file) => (
-            <File key={file.id} file={file} onContextMenu={handleContextMenu}/>
-          )) 
-      }
+            <File key={file.id} file={file} onContextMenu={handleContextMenu} />
+          ))
+        }
+
+        {/* If creating new folder */}
         {isCreatingFolder && <NewFolder />}
       </div>
 
-
+      {/* right click menu */}
       {contextMenu.show && <div className="flex max-h-full justify-center items-center"><ContextMenu contextMenu={contextMenu} /></div>}
+
+      {/* file uploader */}
       {isUploading &&
         <>
-          <div className="absolute top-0 left-0 w-full backdrop-blur-sm z-20">
+          <div className="h-full w-full backdrop-blur-sm absolute top-0 left-0"></div>
+          <div className="w-full backdrop-blur-sm z-20">
             <FileUploader />
           </div>
         </>

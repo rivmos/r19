@@ -1,5 +1,5 @@
 import { Middleware, PayloadAction } from "@reduxjs/toolkit";
-import { setHistory } from "../slices/doc.data";
+// import { setHistory } from "../slices/explorerSlice";
 import { RootState } from "../storeSetup";
 import { IFolder } from "@/@types/explorer";
 

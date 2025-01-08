@@ -1,6 +1,6 @@
 import { IContextMenu } from '@/@types/explorer';
 import { useAppDispatch } from '@/store';
-import { setSelectedFolder } from '@/store/slices/doc.data';
+import { setSelectedFolder } from '@/store/slices/explorerSlice';
 import React, { useEffect, useState } from 'react'
 
 const useContextMenu = () => {
@@ -11,10 +11,7 @@ const useContextMenu = () => {
         show: false,
         x: 0,
         y: 0,
-        item: {
-          id: null,
-          type: 'folder'
-        },
+        item: null,
     })
 
     const handleContextMenu = (e: React.MouseEvent, item: IContextMenu['item']) => {

@@ -2,21 +2,38 @@ import classNames from 'classnames';
 import { IContextMenu, IFile, IFolder } from '@/@types/explorer';
 import { Field, Form, Formik } from "formik";
 import { useEffect, useRef } from "react";
-import { PiFolderSimpleThin, PiFolderSimpleFill } from "react-icons/pi";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setCurrentFolder, setRenaming, setSelectedFolder, updateFolder, useCurrentFolder, useSelectedFolder } from '@/store/slices/doc.data';
+import { setCurrentFolder, setRenaming, setSelectedFolder, updateFolder, explorerSelectors } from '@/store/slices/explorerSlice';
 import { apiCreateOrUpdateFolder } from '@/services/FolderService';
 import { trimString } from '@/utils/helper/string';
-import { AiOutlineFileUnknown, AiOutlineFilePdf, AiOutlineAudio } from "react-icons/ai";
-
+import { AiOutlineFileUnknown, AiOutlineFilePdf, AiOutlineAudio, AiOutlineFileImage } from "react-icons/ai";
 
 function FileIcon({ mimeType, size }) {
-  const mimeIconMap = {
-    'application/pdf': <AiOutlineFilePdf size={size}/>,
-    'audio/mpeg': <AiOutlineAudio size={size}/>,
-  };
-  const icon = mimeIconMap[mimeType] || <AiOutlineFileUnknown size={size} />; // Default icon
-  return icon;
+    // Define an array of mappings for MIME types and their corresponding icons
+    const mimeTypeMappings = [
+        { types: ['application/pdf'], icon: <AiOutlineFilePdf size={size} /> },
+        { types: ['audio/mpeg', 'audio/wav', 'audio/ogg'], icon: <AiOutlineAudio size={size} /> },
+        { types: [
+            "image/jpeg",   // JPEG images
+            "image/png",    // PNG images
+            "image/gif",    // GIF images
+            "image/webp",   // WebP images
+            "image/svg+xml",// SVG images
+            "image/bmp",    // Bitmap images
+            "image/x-icon", // Icon files
+            "image/vnd.microsoft.icon", // ICO files (alternative)
+            "image/tiff",   // TIFF images
+            "image/heif",   // HEIF images
+            "image/heic",   // HEIC images
+            "image/avif"    // AVIF images
+        ], icon: <AiOutlineFileImage size={size} /> },
+    ];
+
+    // Find the first matching icon
+    const match = mimeTypeMappings.find(mapping => mapping.types.includes(mimeType));
+
+    // Return the matched icon or a default icon
+    return match?.icon || <AiOutlineFileUnknown size={size} />;
 }
 
 
@@ -25,10 +42,10 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
     const dispatch = useAppDispatch();
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const selectedFolder = useAppSelector(useSelectedFolder)
-    const currentFolder = useAppSelector(useCurrentFolder)
+    const selectedFolder = useAppSelector(explorerSelectors.useSelectedFolder)
+    const currentFolder = useAppSelector(explorerSelectors.useCurrentFolder)
     const view = useAppSelector(state => state.appSetting.view)
-    const isRenaming = useAppSelector(state => state.docData.isRenaming)
+    const isRenaming = useAppSelector(state => state.explorerSlice.isRenaming)
     const isSelected = selectedFolder === file.id
 
     useEffect(() => {
@@ -46,25 +63,24 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
     // }
 
     const handleClick = () => {
-        if(isSelected) return
+        if (isSelected) return
         dispatch(setSelectedFolder(file.id));
     }
 
 
     return (
-        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, {id: file.id, type: 'file'})} onClick={handleClick} >
-            {/* {isSelected ? <PiFolderSimpleFill size={iconConfig.size} className="text-indigo-500" /> : <PiFolderSimpleThin size={iconConfig.size} className="text-indigo-500" />} */}
-            <FileIcon mimeType={file.mimetype} size={iconConfig.size}/>
+        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, { ...file, type: 'file' })} onClick={handleClick} >
+            <FileIcon mimeType={file.mimetype} size={iconConfig.size} />
             {(isRenaming && isSelected) ?
                 <Formik
                     initialValues={{
                         name: file.name
                     }}
                     onSubmit={async (values) => {
-                        if(file.name === values.name) {
+                        if (file.name === values.name) {
                             dispatch(setRenaming(false));
                             return;
-                        };                        ;
+                        };;
                         const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder, id: file.id });
                         if (res.data) {
                             dispatch(updateFolder(res.data));

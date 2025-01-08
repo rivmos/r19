@@ -12,6 +12,7 @@ export type IFolder = {
 export type IFile = {
     id?: string,
     name: string;
+    filename: string;
     parentId: string;
     url: string;
     size: number;
@@ -25,8 +26,5 @@ export type IContextMenu = {
     x: number,
     y: number,
     show: boolean;
-    item: {
-      id: string | null;
-      type: 'folder' | 'file';
-    };
+    item: IFolder & {type: 'folder'} | IFile & {type: 'file'} | null;
 }

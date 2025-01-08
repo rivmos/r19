@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@/store';
-import { setIsCreatingFolder, setSelectedFolder } from '@/store/slices/doc.data';
+import { setIsCreatingFolder, setSelectedFolder } from '@/store/slices/explorerSlice';
 import React from 'react';
 import { FaFolderOpen, FaUpload, FaPlus } from 'react-icons/fa';
 

@@ -41,23 +41,38 @@ export const getExplorer = createAsyncThunk('getExplorer', async (parentId: stri
 })
 
 const appSettingSlice = createSlice({
-    name: 'appSetting',
+    name: 'explorerSlice',
     initialState,
     reducers: {
-        setRenaming(state, action) {
+        setRenaming(state, action:PayloadAction<boolean>) {
             state.isRenaming = action.payload;
         },
-        setSelectedFolder(state, action) {
-            if(state.selectedFolder === action.payload) return
+        setSelectedFolder(state, action:PayloadAction<string | null>) {
+            if (state.selectedFolder === action.payload) return
             state.selectedFolder = action.payload;
         },
         setCurrentFolder(state, action: PayloadAction<string | null>) {
-            if(state.currentFolder === action.payload) return;
+            if (state.currentFolder === action.payload) return;
+
+            // Update the current folder
             state.currentFolder = action.payload;
-            const selectedFolder = state.folders.find(folder => folder.id === action.payload);
-            state.history.push(selectedFolder);
+
+            // checking if the new folder already in historry
+            const folderIndex = state.history.findIndex(item => item.id === action.payload);
+            if (folderIndex !== -1) {
+                // removing all history after the selected folder
+                state.history = state.history.slice(0, folderIndex + 1);
+            } else {
+                // if new folder is not in history then adding 
+                const selectedFolder = action.payload
+                    ? state.folders.find(folder => folder.id === action.payload)
+                    : { id: null, name: 'root' }; // if payload is null then moving to root folder
+                if (selectedFolder) {
+                    state.history.push(selectedFolder);
+                }
+            }
         },
-        setIsCreatingFolder(state, action) {
+        setIsCreatingFolder(state, action:PayloadAction<boolean>) {
             state.isCreatingFolder = action.payload;
         },
         addNewFolder(state, action: PayloadAction<IFolder>) {
@@ -68,9 +83,6 @@ const appSettingSlice = createSlice({
         },
         deleteFolder(state, action: PayloadAction<string>) {
             state.folders = state.folders.filter(folder => folder.id != action.payload);
-        },
-        setHistory(state, action) {
-            state.history = action.payload;
         },
         setDocFiles(state, action: PayloadAction<IFile[]>) {
             state.files = state.files.concat(action.payload);
@@ -86,14 +98,21 @@ const appSettingSlice = createSlice({
                 state.folders = action.payload.folders;
                 state.files = action.payload.files;
             })
+            .addCase(getExplorer.rejected, (state, action) => {
+                state.loading = false;
+                console.error("Failed to fetch explorer data:", action.error);
+            });
     }
 })
 
-export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setHistory, setDocFiles } = appSettingSlice.actions;
+export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setDocFiles } = appSettingSlice.actions;
 
-export const useFolders = (state: RootState) => state.docData.folders;
-export const useFiles = (state: RootState) => state.docData.files;
-export const useSelectedFolder = (state: RootState) => state.docData.selectedFolder;
-export const useCurrentFolder = (state: RootState) => state.docData.currentFolder;
+export const explorerSelectors = {
+    useFolders: (state: RootState) => state.explorerSlice.folders,
+    useFiles: (state: RootState) => state.explorerSlice.files,
+    useSelectedFolder: (state: RootState) => state.explorerSlice.selectedFolder,
+    useCurrentFolder: (state: RootState) => state.explorerSlice.currentFolder,
+};
+
 
 export default appSettingSlice.reducer;

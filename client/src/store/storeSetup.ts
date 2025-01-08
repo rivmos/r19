@@ -1,12 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import appSettingReducer from './slices/app.setting'
-import docDataReducer from './slices/doc.data'
+import explorerSliceReducer from './slices/explorerSlice'
 import { historyMiddleware } from './middlewares/history'
 
 export const store = configureStore({
   reducer: {
     appSetting: appSettingReducer,
-    docData: docDataReducer
+    explorerSlice: explorerSliceReducer
   },
   middleware: (defaultMiddlewares) =>  defaultMiddlewares().concat(historyMiddleware) 
 })
