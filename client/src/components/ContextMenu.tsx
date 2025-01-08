@@ -1,8 +1,8 @@
 import { IContextMenu, IFile, IFolder } from '@/@types/explorer';
-import { apiDownloadFile } from '@/services/FileService';
+import { apiDeleteFile, apiDownloadFile } from '@/services/FileService';
 import { apiDeleteFolder } from '@/services/FolderService';
 import { useAppDispatch } from '@/store';
-import { deleteFolder, setCurrentFolder, setIsCreatingFolder, setRenaming, setSelectedFolder } from '@/store/slices/explorerSlice';
+import { deleteFile, deleteFolder, setCurrentFolder, setIsCreatingFolder, setRenaming, setSelectedFolder } from '@/store/slices/explorerSlice';
 import { MdDeleteOutline, MdOutlineDriveFileRenameOutline, MdFolderOpen, MdOutlineDownload } from "react-icons/md";
 import { VscNewFolder } from 'react-icons/vsc';
 
@@ -20,9 +20,9 @@ const ContextMenu = ({ contextMenu }: { contextMenu: IContextMenu }) => {
 
     const handleDelete = async () => {
         try {
-            const res = await apiDeleteFolder<IFolder, { id: string }>({ id: contextMenu.item.id });
+            const res =contextMenu.item.type=== 'file' ? await apiDeleteFile<IFile, { id: string }>({ id: contextMenu.item.id }) : await apiDeleteFolder<IFolder, { id: string }>({ id: contextMenu.item.id });
             if (res) {
-                dispatch(deleteFolder(contextMenu.item.id))
+                contextMenu.item.type=== 'file' ? dispatch(deleteFile(contextMenu.item.id)) : dispatch(deleteFolder(contextMenu.item.id));
             }
         } catch (error) {
             console.error('Error deleting folder:', error);

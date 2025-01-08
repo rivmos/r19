@@ -16,3 +16,11 @@ export const apiUpdateFile = async <T, U extends Record<string, unknown>>(data: 
         data
     })
 }
+
+export const apiDeleteFile = async <T, U extends Record<string, unknown>>(params: U) => {
+    return ApiService.fetchData<T>({
+        method: 'delete',
+        url: '/files',
+        params
+    })
+}
