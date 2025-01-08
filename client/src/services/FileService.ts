@@ -8,3 +8,11 @@ export const apiDownloadFile = async <T, U extends Record<string, unknown>>(para
         responseType:'blob'
     })
 } 
+
+export const apiUpdateFile = async <T, U extends Record<string, unknown>>(data: U) => {
+    return ApiService.fetchData<T>({
+        method: 'post',
+        url: '/files',
+        data
+    })
+}

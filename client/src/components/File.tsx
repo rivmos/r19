@@ -3,10 +3,10 @@ import { IContextMenu, IFile, IFolder } from '@/@types/explorer';
 import { Field, Form, Formik } from "formik";
 import { useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setCurrentFolder, setRenaming, setSelectedFolder, updateFolder, explorerSelectors } from '@/store/slices/explorerSlice';
-import { apiCreateOrUpdateFolder } from '@/services/FolderService';
+import { setRenaming, setSelectedFolder, explorerSelectors, updateFile } from '@/store/slices/explorerSlice';
 import { trimString } from '@/utils/helper/string';
 import { AiOutlineFileUnknown, AiOutlineFilePdf, AiOutlineAudio, AiOutlineFileImage } from "react-icons/ai";
+import { apiUpdateFile } from '@/services/FileService';
 
 function FileIcon({ mimeType, size }) {
     // Define an array of mappings for MIME types and their corresponding icons
@@ -67,6 +67,10 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
         dispatch(setSelectedFolder(file.id));
     }
 
+    const dotIndex = file.name.lastIndexOf('.');
+    const onlyName = file.name.substring(0, dotIndex);
+    const onlyExtention = file.name.substring(dotIndex);
+
 
     return (
         <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, { ...file, type: 'file' })} onClick={handleClick} >
@@ -74,16 +78,17 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
             {(isRenaming && isSelected) ?
                 <Formik
                     initialValues={{
-                        name: file.name
+                        name: onlyName, // to separate the editing of the extention
+                        extention: onlyExtention
                     }}
                     onSubmit={async (values) => {
-                        if (file.name === values.name) {
+                        if (onlyName === values.name) {
                             dispatch(setRenaming(false));
                             return;
                         };;
-                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder, id: file.id });
+                        const res = await apiUpdateFile<IFile, any>({ name: values.name + values.extention, id: file.id });
                         if (res.data) {
-                            dispatch(updateFolder(res.data));
+                            dispatch(updateFile(res.data));
                             dispatch(setRenaming(false));
                         }
                     }}

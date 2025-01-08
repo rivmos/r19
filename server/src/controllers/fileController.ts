@@ -81,5 +81,27 @@ router.get('/download/:id', async (req: Request, res: Response): Promise<any> =>
 });
 
 
+router.post('/', async (req: Request, res: Response): Promise<any> => {
+
+    const { id, name} = req.body;
+
+    try {
+            const updateFile = await File.findByIdAndUpdate(
+                id,
+                { name },
+                { new: true }  // Return the updated folder
+            );
+
+            if (!updateFile) {
+                return res.status(404).json({ error: 'File not found' });
+            }
+
+            return res.status(200).json(updateFile);
+
+    } catch (error) {
+        return res.status(500).json({ error: 'Error processing the file' });
+    }
+});
+
 
 export default router;

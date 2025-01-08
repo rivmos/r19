@@ -81,6 +81,9 @@ const appSettingSlice = createSlice({
         updateFolder(state, action: PayloadAction<IFolder>) {
             state.folders = state.folders.map(folder => folder.id === action.payload.id ? action.payload : folder);
         },
+        updateFile(state, action: PayloadAction<IFile>) {
+            state.files = state.files.map(file => file.id === action.payload.id ? action.payload : file);
+        },
         deleteFolder(state, action: PayloadAction<string>) {
             state.folders = state.folders.filter(folder => folder.id != action.payload);
         },
@@ -105,7 +108,7 @@ const appSettingSlice = createSlice({
     }
 })
 
-export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setDocFiles } = appSettingSlice.actions;
+export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setDocFiles, updateFile } = appSettingSlice.actions;
 
 export const explorerSelectors = {
     useFolders: (state: RootState) => state.explorerSlice.folders,
