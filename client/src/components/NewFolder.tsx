@@ -1,11 +1,9 @@
 import classNames from 'classnames';
-import { IFolder } from '@/@types/explorer';
 import { Field, Form, Formik } from "formik";
 import { useEffect, useRef } from "react";
-import { PiFolderSimpleThin, PiFolderSimpleFill } from "react-icons/pi";
+import { PiFolderSimpleFill } from "react-icons/pi";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { addNewFolder, setIsCreatingFolder, explorerSelectors } from '@/store/slices/explorerSlice';
-import { apiCreateOrUpdateFolder } from '@/services/FolderService';
+import { setIsCreatingFolder, explorerSelectors, createOrUpdateFolder } from '@/store/slices/explorerSlice';
 
 const NewFolder = () => {
 
@@ -39,12 +37,8 @@ const NewFolder = () => {
                         dispatch(setIsCreatingFolder(false));
                         return;
                     }
-                    const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder });
-                    if (res.data) {
-                        dispatch(addNewFolder(res.data));
-                        dispatch(setIsCreatingFolder(false));
-                        resetForm();
-                    }
+                    dispatch(createOrUpdateFolder({ ...values, parentId: currentFolder }))
+                    resetForm();
                 }}
             >
                 {

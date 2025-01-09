@@ -22,7 +22,7 @@ const useContextMenu = () => {
           show: true,
           item: item
         });
-        // dispatch(setSelectedFolder(item.id))
+        dispatch(setSelectedFolder(item.id))
       };
 
     useEffect(() => {

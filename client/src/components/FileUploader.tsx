@@ -1,20 +1,19 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setIsUploading, useIsUploading } from "@/store/slices/app.setting";
-import { setDocFiles, explorerSelectors } from "@/store/slices/explorerSlice";
+import { explorerSelectors, uploadFile } from "@/store/slices/explorerSlice";
 import { PiUploadThin } from "react-icons/pi";
 import { VscClose } from "react-icons/vsc";
 import { apiUploadFile } from "@/services/FolderService";
 import { IFile } from "@/@types/explorer";
 
 const FileUploader = () => {
-  const dispatch = useAppDispatch();
   const ref = useRef(null);
+  const dispatch = useAppDispatch();
   const [isDragging, setIsDragging] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const isUploading = useAppSelector(useIsUploading);
   const currentFolder = useAppSelector(explorerSelectors.useCurrentFolder);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -63,12 +62,9 @@ const FileUploader = () => {
     dispatch(setIsUploading(false));
   };
 
-  const handleUpload = async () => {
-    const res = await apiUploadFile<{ message: string, files: IFile[] }, { parentId: string, files: File[] }>({ parentId: currentFolder, files: files });
-    if (res) {
-      dispatch(setIsUploading(false));
-      dispatch(setDocFiles(res.data.files));
-    }
+  const handleUpload = async () => { 
+    await dispatch(uploadFile({parentId: currentFolder, files: files}))
+    dispatch(setIsUploading(false));
   }
 
 

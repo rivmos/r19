@@ -1,9 +1,9 @@
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setIsUploading, setView } from "@/store/slices/app.setting";
+import { setIsCreatingNotebook, setIsUploading, setView } from "@/store/slices/app.setting";
 import { setIsCreatingFolder, setSelectedFolder } from "@/store/slices/explorerSlice";
 import { CiSettings, CiCircleList, CiGrid41, CiFolderOn } from "react-icons/ci";
 import { PiUploadThin } from "react-icons/pi";
-import { VscNewFolder } from "react-icons/vsc";
+import { VscNewFolder, VscNotebook } from "react-icons/vsc";
 
 const Toolbar = () => {
   const dispatch = useAppDispatch();
@@ -16,6 +16,10 @@ const Toolbar = () => {
   const handleCreateNewFolder = () => {
     dispatch(setIsCreatingFolder(true));
     dispatch(setSelectedFolder(null));
+  };
+
+  const handleCreateNotebook = () => {
+    dispatch(setIsCreatingNotebook(true));
   };
 
   const handleUpload = () => {
@@ -55,6 +59,14 @@ const Toolbar = () => {
           onClick={handleCreateNewFolder}
         >
           <VscNewFolder className="h-5 w-5" />
+        </button>
+
+        <button
+          className="flex items-center hover:bg-indigo-50 p-1 w-8 h-8 justify-center rounded-md"
+          aria-label="Create new notebook"
+          onClick={handleCreateNotebook}
+        >
+          <VscNotebook className="h-5 w-5" />
         </button>
 
         {/* Settings Button */}

@@ -4,8 +4,7 @@ import { Field, Form, Formik } from "formik";
 import { useEffect, useRef } from "react";
 import { PiFolderSimpleThin, PiFolderSimpleFill } from "react-icons/pi";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setCurrentFolder, setRenaming, setSelectedFolder, updateFolder, explorerSelectors } from '@/store/slices/explorerSlice';
-import { apiCreateOrUpdateFolder } from '@/services/FolderService';
+import { setCurrentFolder, setRenaming, setSelectedFolder, explorerSelectors, createOrUpdateFolder } from '@/store/slices/explorerSlice';
 import { trimString } from '@/utils/helper/string';
 import { IContextMenu } from '@/@types/explorer';
 import useResponsive from '@/utils/hooks/useResponsive';
@@ -38,9 +37,6 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
 
     const handleClick = () => {
         dispatch(setSelectedFolder(folder.id));
-        // if(responsive.smaller.sm){
-            dispatch(setCurrentFolder(folder.id))
-        // } 
     }
 
     const handleBlur = () => {
@@ -60,18 +56,14 @@ const Folder = ({ folder, onContextMenu }: { folder: IFolder, onContextMenu: (e:
                         if(folder.name === values.name) {
                             dispatch(setRenaming(false));
                             return;
-                        };                        ;
-                        const res = await apiCreateOrUpdateFolder<IFolder, any>({ ...values, parentId: currentFolder, id: folder.id });
-                        if (res.data) {
-                            dispatch(updateFolder(res.data));
-                            dispatch(setRenaming(false));
-                        }
+                        };
+                        dispatch(createOrUpdateFolder({...values, parentId: currentFolder, id: folder.id}))
                     }}
                 >
                     {
                         (props) => (
                             <Form className='flex'>
-                                <Field id="name" name="name" onBlur={props.submitForm} ref={inputRef} placeholder="" className="w-12 h-4 !p-1 text-center bg-indigo-400 text-white rounded-md focus:border-0 focus:ring-0 focus:outline-none text-xs" autoComplete="off" />
+                                <Field id="name" name="name" onBlur={props.submitForm} ref={inputRef} placeholder="" className={classNames("h-4 !p-1 text-center bg-indigo-400 text-white rounded-md focus:border-0 focus:ring-0 focus:outline-none text-xs", {'w-20' : view === 'list'}, {'w-12' : view === 'grid'})} autoComplete="off" />
                                 <button type="submit" className='hidden'>Submit</button>
                             </Form>
                         )

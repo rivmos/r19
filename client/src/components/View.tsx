@@ -7,9 +7,10 @@ import ContextMenu from "./ContextMenu";
 import classNames from "classnames";
 import NewFolder from "./NewFolder";
 import { isEmpty } from 'lodash';
-import { useIsUploading } from "@/store/slices/app.setting";
+import { useIsCreatingNotebook, useIsUploading } from "@/store/slices/app.setting";
 import FileUploader from "./FileUploader";
 import File from "./File";
+import NotebookCreator from "./NotebookCreator";
 
 const View = () => {
 
@@ -21,6 +22,7 @@ const View = () => {
   const currentFolder = useAppSelector(explorerSelectors.useCurrentFolder);
   const isCreatingFolder = useAppSelector(state => state.explorerSlice.isCreatingFolder);
   const isUploading = useAppSelector(useIsUploading);
+  const isCreatingNotebook = useAppSelector(useIsCreatingNotebook);
 
   const { contextMenu, handleContextMenu } = useContextMenu();
 
@@ -66,6 +68,16 @@ const View = () => {
           <div className="h-full w-full backdrop-blur-sm absolute top-0 left-0"></div>
           <div className="w-full backdrop-blur-sm z-20">
             <FileUploader />
+          </div>
+        </>
+      }
+
+      {
+        isCreatingNotebook &&
+        <>
+          <div className="h-full w-full backdrop-blur-sm absolute top-0 left-0"></div>
+          <div className="w-full backdrop-blur-sm z-20">
+            <NotebookCreator />
           </div>
         </>
       }

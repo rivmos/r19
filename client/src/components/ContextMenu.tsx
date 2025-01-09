@@ -1,8 +1,8 @@
 import { IContextMenu, IFile, IFolder } from '@/@types/explorer';
-import { apiDeleteFile, apiDownloadFile } from '@/services/FileService';
-import { apiDeleteFolder } from '@/services/FolderService';
+import { apiDownloadFile } from '@/services/FileService';
 import { useAppDispatch } from '@/store';
 import { deleteFile, deleteFolder, setCurrentFolder, setIsCreatingFolder, setRenaming, setSelectedFolder } from '@/store/slices/explorerSlice';
+import { downloadBlob } from '@/utils/helper/download';
 import { MdDeleteOutline, MdOutlineDriveFileRenameOutline, MdFolderOpen, MdOutlineDownload } from "react-icons/md";
 import { VscNewFolder } from 'react-icons/vsc';
 
@@ -20,10 +20,7 @@ const ContextMenu = ({ contextMenu }: { contextMenu: IContextMenu }) => {
 
     const handleDelete = async () => {
         try {
-            const res =contextMenu.item.type=== 'file' ? await apiDeleteFile<IFile, { id: string }>({ id: contextMenu.item.id }) : await apiDeleteFolder<IFolder, { id: string }>({ id: contextMenu.item.id });
-            if (res) {
-                contextMenu.item.type=== 'file' ? dispatch(deleteFile(contextMenu.item.id)) : dispatch(deleteFolder(contextMenu.item.id));
-            }
+            contextMenu.item.type === 'file' ? dispatch(deleteFile(contextMenu.item.id)) : dispatch(deleteFolder(contextMenu.item.id));
         } catch (error) {
             console.error('Error deleting folder:', error);
         }
@@ -32,24 +29,9 @@ const ContextMenu = ({ contextMenu }: { contextMenu: IContextMenu }) => {
     const handleDownload = async () => {
         try {
             const res = await apiDownloadFile<Blob, { id: string }>({ id: contextMenu.item.id });
-            // const blob = new Blob([res?.data], { type: (contextMenu.item as IFile).mimetype });
-            // const url = window.URL.createObjectURL(blob);
-            // const link = document.createElement('a');
-            // link.href = url;
-            // link.setAttribute('download', (contextMenu.item as IFile).name);
-            // document.body.appendChild(link);
-            // link.click();
-            // link.remove();
-            // window.URL.revokeObjectURL(url);
-
-            const url = URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', (contextMenu.item as IFile).name);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(url);
+            if(res){
+                downloadBlob(res.data, (contextMenu.item as IFile).name);
+            }
         } catch (error) {
             console.error('Error deleting folder:', error);
         }
@@ -124,7 +106,7 @@ const ContextMenu = ({ contextMenu }: { contextMenu: IContextMenu }) => {
                 <MdDeleteOutline className="w-4 h-4" />
                 <span className="text-sm">Delete</span>
             </button>
-            
+
         </div>
     )
 }

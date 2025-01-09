@@ -6,27 +6,32 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { setRenaming, setSelectedFolder, explorerSelectors, updateFile } from '@/store/slices/explorerSlice';
 import { trimString } from '@/utils/helper/string';
 import { AiOutlineFileUnknown, AiOutlineFilePdf, AiOutlineAudio, AiOutlineFileImage } from "react-icons/ai";
-import { apiUpdateFile } from '@/services/FileService';
+import { apiDownloadFile, apiUpdateFile } from '@/services/FileService';
+import { downloadBlob } from '@/utils/helper/download';
+import { BsFileEarmarkText } from "react-icons/bs";
 
 function FileIcon({ mimeType, size }) {
     // Define an array of mappings for MIME types and their corresponding icons
     const mimeTypeMappings = [
+        { types: ['text/plain'], icon: <BsFileEarmarkText size={size}/> },
         { types: ['application/pdf'], icon: <AiOutlineFilePdf size={size} /> },
         { types: ['audio/mpeg', 'audio/wav', 'audio/ogg'], icon: <AiOutlineAudio size={size} /> },
-        { types: [
-            "image/jpeg",   // JPEG images
-            "image/png",    // PNG images
-            "image/gif",    // GIF images
-            "image/webp",   // WebP images
-            "image/svg+xml",// SVG images
-            "image/bmp",    // Bitmap images
-            "image/x-icon", // Icon files
-            "image/vnd.microsoft.icon", // ICO files (alternative)
-            "image/tiff",   // TIFF images
-            "image/heif",   // HEIF images
-            "image/heic",   // HEIC images
-            "image/avif"    // AVIF images
-        ], icon: <AiOutlineFileImage size={size} /> },
+        {
+            types: [
+                "image/jpeg",   // JPEG images
+                "image/png",    // PNG images
+                "image/gif",    // GIF images
+                "image/webp",   // WebP images
+                "image/svg+xml",// SVG images
+                "image/bmp",    // Bitmap images
+                "image/x-icon", // Icon files
+                "image/vnd.microsoft.icon", // ICO files (alternative)
+                "image/tiff",   // TIFF images
+                "image/heif",   // HEIF images
+                "image/heic",   // HEIC images
+                "image/avif"    // AVIF images
+            ], icon: <AiOutlineFileImage size={size} />
+        },
     ];
 
     // Find the first matching icon
@@ -43,7 +48,6 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
 
     const inputRef = useRef<HTMLInputElement>(null);
     const selectedFolder = useAppSelector(explorerSelectors.useSelectedFolder)
-    const currentFolder = useAppSelector(explorerSelectors.useCurrentFolder)
     const view = useAppSelector(state => state.appSetting.view)
     const isRenaming = useAppSelector(state => state.explorerSlice.isRenaming)
     const isSelected = selectedFolder === file.id
@@ -58,14 +62,22 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
         size: view === 'grid' ? 36 : 12
     }
 
-    // const handleDblClick = () => {
-    //     dispatch(setCurrentFolder(file));
-    // }
-
     const handleClick = () => {
         if (isSelected) return
         dispatch(setSelectedFolder(file.id));
     }
+
+
+    const handleDblClick = async () => {
+        try {
+            const res = await apiDownloadFile<Blob, { id: string }>({ id: file.id });
+            if(res){
+                downloadBlob(res.data, file.name);
+            }
+        } catch (error) {
+            console.error('Error deleting folder:', error);
+        }
+    };
 
     const dotIndex = file.name.lastIndexOf('.');
     const onlyName = file.name.substring(0, dotIndex);
@@ -73,7 +85,7 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
 
 
     return (
-        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, { ...file, type: 'file' })} onClick={handleClick} >
+        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, { ...file, type: 'file' })} onClick={handleClick} onDoubleClick={handleDblClick}>
             <FileIcon mimeType={file.mimetype} size={iconConfig.size} />
             {(isRenaming && isSelected) ?
                 <Formik

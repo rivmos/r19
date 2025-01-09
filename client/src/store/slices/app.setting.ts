@@ -4,12 +4,14 @@ import { IView } from "@/@types/explorer";
 
 export interface IInitialState {
     view: IView,
-    isUploading: boolean
+    isUploading: boolean,
+    isCreatingNotebook: boolean
 }
 
 const initialState: IInitialState = {
     view: 'grid',
-    isUploading: false
+    isUploading: false,
+    isCreatingNotebook: false,
 }
 
 const appSettingSlice = createSlice({
@@ -21,11 +23,15 @@ const appSettingSlice = createSlice({
         },
         setIsUploading(state, action){
             state.isUploading = action.payload;
+        },
+        setIsCreatingNotebook(state, action){
+            state.isCreatingNotebook = action.payload;
         }
     }
 })
 
-export const { setView, setIsUploading } = appSettingSlice.actions;
+export const { setView, setIsUploading, setIsCreatingNotebook } = appSettingSlice.actions;
 export const useIsUploading = (state:RootState) => state.appSetting.isUploading;
+export const useIsCreatingNotebook = (state:RootState) => state.appSetting.isCreatingNotebook;
 
 export default appSettingSlice.reducer;

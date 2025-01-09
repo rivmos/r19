@@ -3,6 +3,8 @@ import { RootState } from "../storeSetup";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IFile, IFolder } from "@/@types/explorer";
 import { apiGetExplorer } from "@/services/ExplorerService";
+import { apiDeleteFile } from "@/services/FileService";
+import { apiCreateOrUpdateFolder, apiDeleteFolder, apiUploadFile } from "@/services/FolderService";
 
 export interface IInitialState {
     loading: boolean,
@@ -40,14 +42,34 @@ export const getExplorer = createAsyncThunk('getExplorer', async (parentId: stri
     return res.data
 })
 
+export const deleteFile = createAsyncThunk('deleteFile', async (id: string) => {
+    const res = await apiDeleteFile<IFile, { id: string }>({ id });
+    return res.data
+})
+
+export const uploadFile = createAsyncThunk('uploadFile', async (data: { parentId: string, files: File[] }) => {
+    const res = await apiUploadFile<{ message: string, files: IFile[] }, { parentId: string, files: File[] }>(data);
+    return res.data
+})
+
+export const deleteFolder = createAsyncThunk('deleteFolder', async (id: string) => {
+    const res = await apiDeleteFolder<IFolder, { id: string }>({ id });
+    return res.data
+})
+
+export const createOrUpdateFolder = createAsyncThunk('createOrUpdateFolder', async (data: IFolder) => {
+    const res = await apiCreateOrUpdateFolder<IFolder, IFolder>(data);
+    return res.data
+})
+
 const appSettingSlice = createSlice({
     name: 'explorerSlice',
     initialState,
     reducers: {
-        setRenaming(state, action:PayloadAction<boolean>) {
+        setRenaming(state, action: PayloadAction<boolean>) {
             state.isRenaming = action.payload;
         },
-        setSelectedFolder(state, action:PayloadAction<string | null>) {
+        setSelectedFolder(state, action: PayloadAction<string | null>) {
             if (state.selectedFolder === action.payload) return
             state.selectedFolder = action.payload;
         },
@@ -72,26 +94,11 @@ const appSettingSlice = createSlice({
                 }
             }
         },
-        setIsCreatingFolder(state, action:PayloadAction<boolean>) {
+        setIsCreatingFolder(state, action: PayloadAction<boolean>) {
             state.isCreatingFolder = action.payload;
-        },
-        addNewFolder(state, action: PayloadAction<IFolder>) {
-            state.folders.push(action.payload);
-        },
-        updateFolder(state, action: PayloadAction<IFolder>) {
-            state.folders = state.folders.map(folder => folder.id === action.payload.id ? action.payload : folder);
         },
         updateFile(state, action: PayloadAction<IFile>) {
             state.files = state.files.map(file => file.id === action.payload.id ? action.payload : file);
-        },
-        deleteFolder(state, action: PayloadAction<string>) {
-            state.folders = state.folders.filter(folder => folder.id != action.payload);
-        },
-        deleteFile(state, action: PayloadAction<string>) {
-            state.files = state.files.filter(file => file.id != action.payload);
-        },
-        setDocFiles(state, action: PayloadAction<IFile[]>) {
-            state.files = state.files.concat(action.payload);
         }
     },
     extraReducers: (builder) => {
@@ -106,12 +113,33 @@ const appSettingSlice = createSlice({
             })
             .addCase(getExplorer.rejected, (state, action) => {
                 state.loading = false;
-                console.error("Failed to fetch explorer data:", action.error);
-            });
+                console.error("Failed to fetch explorer data:", action);
+            })
+            .addCase(deleteFile.fulfilled, (state, action) => {
+                state.files = state.files.filter(file => file.id != action.meta.arg);
+            })
+            .addCase(deleteFolder.fulfilled, (state, action) => {
+                state.folders = state.folders.filter(folder => folder.id != action.meta.arg);
+            })
+            .addCase(createOrUpdateFolder.fulfilled, (state, action) => {
+                if (action.meta.arg.id) {
+                    state.folders = state.folders.map(folder => folder.id === action.payload.id ? action.payload : folder);
+                    state.isRenaming = false;
+                }
+                else {
+                    state.folders.push(action.payload);
+                    state.isCreatingFolder = false;
+                }
+            })
+            .addCase(uploadFile.fulfilled, (state, action) => {
+                // state.folders = state.folders.filter(folder => folder.id != action.meta.arg);
+                state.files = state.files.concat(action.payload.files);
+            })
+
     }
 })
 
-export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, addNewFolder, updateFolder, deleteFolder, setDocFiles, updateFile, deleteFile } = appSettingSlice.actions;
+export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, updateFile } = appSettingSlice.actions;
 
 export const explorerSelectors = {
     useFolders: (state: RootState) => state.explorerSlice.folders,
