@@ -4,7 +4,8 @@ const { Schema, Document } = mongoose;
 export interface IFolder extends Document {
     name: string;
     parentId?: string;
-    subFolders?: IFolder[];
+    subFolders?: string[];
+    files?: string[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -13,6 +14,7 @@ const FolderSchema = new Schema<IFolder>({
     name: { type: String, required: true },
     parentId: { type: Schema.Types.ObjectId, ref: 'Folder', default: null },
     subFolders: [{ type: Schema.Types.ObjectId, ref: 'Folder' }],
+    files: [{ type: Schema.Types.ObjectId, ref: 'File' }],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 }, { timestamps: true })

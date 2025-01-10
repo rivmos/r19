@@ -1,6 +1,6 @@
 import { IContextMenu } from '@/@types/explorer';
 import { useAppDispatch } from '@/store';
-import { setSelectedFolder } from '@/store/slices/explorerSlice';
+import { setSelected } from '@/store/slices/explorerSlice';
 import React, { useEffect, useState } from 'react'
 
 const useContextMenu = () => {
@@ -22,7 +22,7 @@ const useContextMenu = () => {
           show: true,
           item: item
         });
-        dispatch(setSelectedFolder(item.id))
+        // dispatch(setSelected({isMulti: false, id: item.id}))
       };
 
     useEffect(() => {

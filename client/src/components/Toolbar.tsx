@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/store";
 import { setIsCreatingNotebook, setIsUploading, setView } from "@/store/slices/app.setting";
-import { setIsCreatingFolder, setSelectedFolder } from "@/store/slices/explorerSlice";
+import { setIsCreatingFolder, setSelected } from "@/store/slices/explorerSlice";
 import { CiSettings, CiCircleList, CiGrid41, CiFolderOn } from "react-icons/ci";
 import { PiUploadThin } from "react-icons/pi";
 import { VscNewFolder, VscNotebook } from "react-icons/vsc";
@@ -15,7 +15,7 @@ const Toolbar = () => {
 
   const handleCreateNewFolder = () => {
     dispatch(setIsCreatingFolder(true));
-    dispatch(setSelectedFolder(null));
+    dispatch(setSelected(null));
   };
 
   const handleCreateNotebook = () => {

@@ -3,17 +3,18 @@ import { IContextMenu, IFile, IFolder } from '@/@types/explorer';
 import { Field, Form, Formik } from "formik";
 import { useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { setRenaming, setSelectedFolder, explorerSelectors, updateFile } from '@/store/slices/explorerSlice';
+import { setRenaming, setSelected, explorerSelectors, makeIsSelectedSelector, updateFile } from '@/store/slices/explorerSlice';
 import { trimString } from '@/utils/helper/string';
 import { AiOutlineFileUnknown, AiOutlineFilePdf, AiOutlineAudio, AiOutlineFileImage } from "react-icons/ai";
 import { apiDownloadFile, apiUpdateFile } from '@/services/FileService';
 import { downloadBlob } from '@/utils/helper/download';
 import { BsFileEarmarkText } from "react-icons/bs";
+import useKeyboard from '@/utils/hooks/useKeyboard';
 
 function FileIcon({ mimeType, size }) {
     // Define an array of mappings for MIME types and their corresponding icons
     const mimeTypeMappings = [
-        { types: ['text/plain'], icon: <BsFileEarmarkText size={size}/> },
+        { types: ['text/plain'], icon: <BsFileEarmarkText size={size} /> },
         { types: ['application/pdf'], icon: <AiOutlineFilePdf size={size} /> },
         { types: ['audio/mpeg', 'audio/wav', 'audio/ogg'], icon: <AiOutlineAudio size={size} /> },
         {
@@ -47,10 +48,14 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
     const dispatch = useAppDispatch();
 
     const inputRef = useRef<HTMLInputElement>(null);
-    const selectedFolder = useAppSelector(explorerSelectors.useSelectedFolder)
-    const view = useAppSelector(state => state.appSetting.view)
-    const isRenaming = useAppSelector(state => state.explorerSlice.isRenaming)
-    const isSelected = selectedFolder === file.id
+    const fileRef = useRef<HTMLInputElement>(null);
+    const selectedFolder = useAppSelector(explorerSelectors.useSelectedFolder);
+    const isSelected = useAppSelector(makeIsSelectedSelector({ id: file.id, type: 'file' }));
+    const view = useAppSelector(state => state.appSetting.view);
+    const isRenaming = useAppSelector(state => state.explorerSlice.isRenaming);
+    // const isSelected = selectedFolder === file.id
+
+    useKeyboard(fileRef.current);
 
     useEffect(() => {
         if (inputRef.current) {
@@ -62,16 +67,15 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
         size: view === 'grid' ? 36 : 12
     }
 
-    const handleClick = () => {
-        if (isSelected) return
-        dispatch(setSelectedFolder(file.id));
+    const handleClick = (e) => {
+        dispatch(setSelected({ isMulti: e.ctrlKey || e.metaKey, selection: { id: file.id, type: 'file' } }));
     }
 
 
     const handleDblClick = async () => {
         try {
             const res = await apiDownloadFile<Blob, { id: string }>({ id: file.id });
-            if(res){
+            if (res) {
                 downloadBlob(res.data, file.name);
             }
         } catch (error) {
@@ -85,7 +89,7 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
 
 
     return (
-        <div className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, { ...file, type: 'file' })} onClick={handleClick} onDoubleClick={handleDblClick}>
+        <div ref={fileRef} className={classNames("flex items-center select-none cursor-pointer hover:bg-indigo-50 p-1 border-b gap-1", { 'w-16 flex-col items-start justify-center border-b-0 gap-0 rounded-md': view === 'grid' }, { 'bg-indigo-200': isSelected })} onContextMenu={(e) => onContextMenu(e, { ...file, type: 'file' })} onClick={handleClick} onDoubleClick={handleDblClick}>
             <FileIcon mimeType={file.mimetype} size={iconConfig.size} />
             {(isRenaming && isSelected) ?
                 <Formik
@@ -97,12 +101,11 @@ const File = ({ file, onContextMenu }: { file: IFile, onContextMenu: (e: React.M
                         if (onlyName === values.name) {
                             dispatch(setRenaming(false));
                             return;
-                        };;
-                        const res = await apiUpdateFile<IFile, any>({ name: values.name + values.extention, id: file.id });
-                        if (res.data) {
-                            dispatch(updateFile(res.data));
-                            dispatch(setRenaming(false));
-                        }
+                        };
+
+                        await dispatch(updateFile({ name: values.name + values.extention, id: file.id }));
+                        dispatch(setRenaming(false));
+
                     }}
                 >
                     {

@@ -12,13 +12,13 @@ export type IFolder = {
 export type IFile = {
     id?: string,
     name: string;
-    filename: string;
-    parentId: string;
-    url: string;
-    size: number;
-    mimetype: string;
-    createdAt: string; // ISO date string
-    updatedAt: string; // ISO date string
+    filename?: string;
+    parentId?: string;
+    url?: string;
+    size?: number;
+    mimetype?: string;
+    createdAt?: string; // ISO date string
+    updatedAt?: string; // ISO date string
   };
   
 

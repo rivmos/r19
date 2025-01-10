@@ -2,9 +2,14 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../storeSetup";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { IFile, IFolder } from "@/@types/explorer";
-import { apiGetExplorer } from "@/services/ExplorerService";
-import { apiDeleteFile } from "@/services/FileService";
+import { apiDeleteMultiple, apiGetExplorer } from "@/services/ExplorerService";
+import { apiDeleteFile, apiUpdateFile } from "@/services/FileService";
 import { apiCreateOrUpdateFolder, apiDeleteFolder, apiUploadFile } from "@/services/FolderService";
+
+export interface ISelected {
+    id: string,
+    type: 'folder' | 'file'
+}
 
 export interface IInitialState {
     loading: boolean,
@@ -13,7 +18,7 @@ export interface IInitialState {
     folders: IFolder[],
     files: IFile[],
     history: IFolder[],
-    selectedFolder: string | null,
+    selected: ISelected[],
     currentFolder: string | null,
 }
 
@@ -24,7 +29,7 @@ const initialState: IInitialState = {
     folders: [],
     files: [],
     history: [{ id: null, name: 'root' }],
-    selectedFolder: null,
+    selected: [],
     currentFolder: null,
 }
 
@@ -47,18 +52,28 @@ export const deleteFile = createAsyncThunk('deleteFile', async (id: string) => {
     return res.data
 })
 
-export const uploadFile = createAsyncThunk('uploadFile', async (data: { parentId: string, files: File[] }) => {
-    const res = await apiUploadFile<{ message: string, files: IFile[] }, { parentId: string, files: File[] }>(data);
-    return res.data
-})
-
 export const deleteFolder = createAsyncThunk('deleteFolder', async (id: string) => {
     const res = await apiDeleteFolder<IFolder, { id: string }>({ id });
     return res.data
 })
 
+export const deleteMultiple = createAsyncThunk('deleteMultiple', async (data: { files: string[], folders: string[]}) => {
+    const res = await apiDeleteMultiple<any, { files: string[], folders: string[] }>(data);
+    return res.data
+})
+
+export const uploadFile = createAsyncThunk('uploadFile', async (data: { parentId: string, files: File[] }) => {
+    const res = await apiUploadFile<{ message: string, files: IFile[] }, { parentId: string, files: File[] }>(data);
+    return res.data
+})
+
 export const createOrUpdateFolder = createAsyncThunk('createOrUpdateFolder', async (data: IFolder) => {
     const res = await apiCreateOrUpdateFolder<IFolder, IFolder>(data);
+    return res.data
+})
+
+export const updateFile = createAsyncThunk('updateFile', async (data: IFile) => {
+    const res = await apiUpdateFile<IFile, IFile>(data)
     return res.data
 })
 
@@ -69,9 +84,10 @@ const appSettingSlice = createSlice({
         setRenaming(state, action: PayloadAction<boolean>) {
             state.isRenaming = action.payload;
         },
-        setSelectedFolder(state, action: PayloadAction<string | null>) {
-            if (state.selectedFolder === action.payload) return
-            state.selectedFolder = action.payload;
+        setSelected(state, action: PayloadAction<{ isMulti: boolean, selection: ISelected }>) {
+            if (state.selected.some(item => item.id === action.payload.selection.id)) return
+            if (action.payload.isMulti) state.selected.push(action.payload.selection);
+            if (!action.payload.isMulti) state.selected = [action.payload.selection];
         },
         setCurrentFolder(state, action: PayloadAction<string | null>) {
             if (state.currentFolder === action.payload) return;
@@ -97,9 +113,6 @@ const appSettingSlice = createSlice({
         setIsCreatingFolder(state, action: PayloadAction<boolean>) {
             state.isCreatingFolder = action.payload;
         },
-        updateFile(state, action: PayloadAction<IFile>) {
-            state.files = state.files.map(file => file.id === action.payload.id ? action.payload : file);
-        }
     },
     extraReducers: (builder) => {
         builder
@@ -132,20 +145,30 @@ const appSettingSlice = createSlice({
                 }
             })
             .addCase(uploadFile.fulfilled, (state, action) => {
-                // state.folders = state.folders.filter(folder => folder.id != action.meta.arg);
                 state.files = state.files.concat(action.payload.files);
+            })
+            .addCase(deleteMultiple.fulfilled, (state, action) => {
+                state.files = state.files.filter(file => !action.meta.arg.files.includes(file.id));
+                state.folders = state.folders.filter(folder => !action.meta.arg.folders.includes(folder.id));
+            })
+            .addCase(updateFile.fulfilled, (state, action) => {
+                state.files = state.files.map(file => file.id === action.payload.id ? action.payload : file);
             })
 
     }
 })
 
-export const { setRenaming, setSelectedFolder, setIsCreatingFolder, setCurrentFolder, updateFile } = appSettingSlice.actions;
+export const { setRenaming, setSelected, setIsCreatingFolder, setCurrentFolder } = appSettingSlice.actions;
 
 export const explorerSelectors = {
     useFolders: (state: RootState) => state.explorerSlice.folders,
     useFiles: (state: RootState) => state.explorerSlice.files,
-    useSelectedFolder: (state: RootState) => state.explorerSlice.selectedFolder,
+    useSelectedFolder: (state: RootState) => state.explorerSlice.selected,
     useCurrentFolder: (state: RootState) => state.explorerSlice.currentFolder,
+};
+
+export const makeIsSelectedSelector = (selection: ISelected) => (state: RootState) => {
+    return state.explorerSlice.selected.some(item => item.id === selection.id);
 };
 
 

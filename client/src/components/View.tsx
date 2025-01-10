@@ -11,6 +11,7 @@ import { useIsCreatingNotebook, useIsUploading } from "@/store/slices/app.settin
 import FileUploader from "./FileUploader";
 import File from "./File";
 import NotebookCreator from "./NotebookCreator";
+import useKeyboard from "@/utils/hooks/useKeyboard";
 
 const View = () => {
 
@@ -23,12 +24,17 @@ const View = () => {
   const isCreatingFolder = useAppSelector(state => state.explorerSlice.isCreatingFolder);
   const isUploading = useAppSelector(useIsUploading);
   const isCreatingNotebook = useAppSelector(useIsCreatingNotebook);
-
   const { contextMenu, handleContextMenu } = useContextMenu();
+  const selected = useAppSelector(state => state.explorerSlice.selected);
 
   useEffect(() => {
     dispatch(getExplorer(currentFolder));
   }, [currentFolder]);
+
+  // addtional info in case of multi select 
+  const isMultiSelection = selected.length > 1;
+  const fileInSelection = selected.some(selection => selection.type === 'file');
+  const folderInSelection = selected.some(selection => selection.type === 'folder');
 
   return (
     <div className={classNames("p-4 h-screen relative", { '!p-0': view === 'list' })}>
@@ -60,7 +66,13 @@ const View = () => {
       </div>
 
       {/* right click menu */}
-      {contextMenu.show && <div className="flex max-h-full justify-center items-center"><ContextMenu contextMenu={contextMenu} /></div>}
+      {contextMenu.show && <div className="flex max-h-full justify-center items-center"><ContextMenu contextMenu={contextMenu} multi={
+        {
+          fileInSelection,
+          folderInSelection,
+          isMultiSelection
+        }
+      } /></div>}
 
       {/* file uploader */}
       {isUploading &&

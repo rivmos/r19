@@ -55,8 +55,14 @@ router.post('/', async (req: Request, res: Response): Promise<any> => {
             return res.status(200).json(updatedFolder);
         } else {
             // If no 'id' is provided, create a new folder
+
             const newFolder = new Folder({ name, parentId });
             const savedFolder = await newFolder.save();
+            // await Folder.findByIdAndUpdate(
+            //     parentId,
+            //     { subFolders: savedFolder.id },
+            //     { new: true }  // Return the updated folder
+            // );
             return res.status(200).json(savedFolder);
         }
     } catch (error) {
