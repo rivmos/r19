@@ -5,38 +5,38 @@ import React, { useEffect, useState } from 'react'
 
 const useContextMenu = () => {
 
-    const dispatch = useAppDispatch()
-  
-    const [contextMenu, setContextMenu] = useState<IContextMenu>({
-        show: false,
-        x: 0,
-        y: 0,
-        item: null,
-    })
+  const dispatch = useAppDispatch()
 
-    const handleContextMenu = (e: React.MouseEvent, item: IContextMenu['item']) => {
-        e.preventDefault();
-        setContextMenu({
-          x: e.pageX,
-          y: e.pageY,
-          show: true,
-          item: item
-        });
-        // dispatch(setSelected({isMulti: false, id: item.id}))
-      };
+  const [contextMenu, setContextMenu] = useState<IContextMenu>({
+    show: false,
+    x: 0,
+    y: 0,
+    item: null,
+  })
 
-    useEffect(() => {
-        const handleClick = () => {
-          setContextMenu(prev => ({ ...prev, show: false }));
-        };
-    
-        document.addEventListener('click', handleClick);
-        return () => {
-          document.removeEventListener('click', handleClick);
-        };
-      }, []);
+  const handleContextMenu = (e: React.MouseEvent, item: IContextMenu['item']) => {
+    e.preventDefault();
+    setContextMenu({
+      x: e.pageX,
+      y: e.pageY,
+      show: true,
+      item: item
+    });
+    dispatch(setSelected({ isMulti: false, selection: { id: item.id, type:item.type} }))
+  };
 
-    return { contextMenu, setContextMenu, handleContextMenu}
+  useEffect(() => {
+    const handleClick = () => {
+      setContextMenu(prev => ({ ...prev, show: false }));
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
+
+  return { contextMenu, setContextMenu, handleContextMenu }
 
 }
 

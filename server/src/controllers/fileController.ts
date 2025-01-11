@@ -4,6 +4,7 @@ import { MulterError } from 'multer';
 import File from '../models/File';
 import path from 'path';
 import fs from 'fs';
+import Folder from '../models/Folder';
 
 interface IFile {
   fieldname: string;
@@ -40,9 +41,13 @@ router.post('/upload', uploadFile.array('files[]'), async (req, res) => {
 
     const savedFiles = [];
     for (const file of req.files as IFile[]) {
-      console.log('files', file)
       const newFile = new File({ name: file.originalname, filename: file.filename, size: file.size, parentId: parentId, mimetype: file.mimetype, url: `/uploads/${file.filename}` });
       const saved = await newFile.save();
+      await Folder.findByIdAndUpdate(
+        parentId,
+        { $push : {files: saved.id} },
+        { new: true }  // Return the updated folder
+      );
       savedFiles.push(saved);
     }
 
@@ -83,42 +88,42 @@ router.get('/download/:id', async (req: Request, res: Response): Promise<any> =>
 
 router.post('/', async (req: Request, res: Response): Promise<any> => {
 
-    const { id, name} = req.body;
+  const { id, name } = req.body;
 
-    try {
-            const updateFile = await File.findByIdAndUpdate(
-                id,
-                { name },
-                { new: true }  // Return the updated folder
-            );
+  try {
+    const updateFile = await File.findByIdAndUpdate(
+      id,
+      { name },
+      { new: true }  // Return the updated folder
+    );
 
-            if (!updateFile) {
-                return res.status(404).json({ error: 'File not found' });
-            }
-
-            return res.status(200).json(updateFile);
-
-    } catch (error) {
-        return res.status(500).json({ error: 'Error processing the file' });
+    if (!updateFile) {
+      return res.status(404).json({ error: 'File not found' });
     }
+
+    return res.status(200).json(updateFile);
+
+  } catch (error) {
+    return res.status(500).json({ error: 'Error processing the file' });
+  }
 });
 
 router.delete('/', async (req: Request, res: Response) => {
 
-    const { id } = req.query;
+  const { id } = req.query;
 
-    try {
-        const deletedFile = await File.deleteOne({ _id: id }); // Adjust field name
+  try {
+    const deletedFile = await File.deleteOne({ _id: id }); // Adjust field name
 
-        if (deletedFile.deletedCount > 0) {
-            res.status(200).json({ message: 'File deleted successfully' });
-        } else {
-            res.status(404).json({ message: 'File not found' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error deleting file', error });
+    if (deletedFile.deletedCount > 0) {
+      res.status(200).json({ message: 'File deleted successfully' });
+    } else {
+      res.status(404).json({ message: 'File not found' });
     }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error deleting file', error });
+  }
 });
 
 

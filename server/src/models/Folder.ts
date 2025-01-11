@@ -4,8 +4,8 @@ const { Schema, Document } = mongoose;
 export interface IFolder extends Document {
     name: string;
     parentId?: string;
-    subFolders?: string[];
-    files?: string[];
+    subFolders?: mongoose.Types.ObjectId[];
+    files?: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
 }

@@ -85,10 +85,26 @@ const appSettingSlice = createSlice({
             state.isRenaming = action.payload;
         },
         setSelected(state, action: PayloadAction<{ isMulti: boolean, selection: ISelected }>) {
-            if (state.selected.some(item => item.id === action.payload.selection.id)) return
-            if (action.payload.isMulti) state.selected.push(action.payload.selection);
-            if (!action.payload.isMulti) state.selected = [action.payload.selection];
+            const { isMulti, selection } = action.payload;
+            const alreadySelected = state.selected.some(item => item.id === selection.id);
+        
+            if (alreadySelected) {
+                if (isMulti) {
+                    // Remove from selection if already selected in multi-select mode
+                    state.selected = state.selected.filter(item => item.id !== selection.id);
+                }
+                return; 
+            }
+        
+            if (isMulti) {
+                // Add to selections in multi-select mode
+                state.selected.push(selection);
+            } else {
+                // Replace selection in single-select mode
+                state.selected = [selection];
+            }
         },
+        
         setCurrentFolder(state, action: PayloadAction<string | null>) {
             if (state.currentFolder === action.payload) return;
 

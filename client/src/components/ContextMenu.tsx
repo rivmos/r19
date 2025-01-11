@@ -7,6 +7,7 @@ import { MdDeleteOutline, MdOutlineDriveFileRenameOutline, MdFolderOpen, MdOutli
 import { VscNewFolder } from 'react-icons/vsc';
 import { groupByType } from '@/utils/helper/multiSelect';
 import { apiDownloadMultiple } from '@/services/ExplorerService';
+import { apiDownloadFolder } from '@/services/FolderService';
 
 
 const ContextMenu = ({ contextMenu, multi }: {
@@ -49,7 +50,7 @@ const ContextMenu = ({ contextMenu, multi }: {
         }
     };
 
-    const handleDownload = async () => {
+    const handleDownloadFile = async () => {
         try {
             const res = await apiDownloadFile<Blob, { id: string }>({ id: contextMenu.item.id });
             if (res) {
@@ -60,10 +61,27 @@ const ContextMenu = ({ contextMenu, multi }: {
         }
     };
 
-    const handleDownloadAll = async () => {
-        const { files } = groupByType(selected);
+
+    const handleDownloadFolder = async () => {
         try {
-            const res = await apiDownloadMultiple<Blob, { files: string[] }>({ files });
+            const res = await apiDownloadFolder<Blob, { id: string }>({ id: contextMenu.item.id });
+            if (res) {
+                downloadBlob(res.data, (contextMenu.item as IFolder).name + '.zip');
+            }
+        } catch (error) {
+            console.error('Error deleting folder:', error);
+        }
+    };
+
+    
+    const handleDownloadSingleItem = () => {
+        contextMenu.item.type === 'file' ? handleDownloadFile() : handleDownloadFolder();
+    }
+
+    const handleDownloadAll = async () => {
+        const { files, folders } = groupByType(selected);
+        try {
+            const res = await apiDownloadMultiple<Blob, { files: string[], folders: string[] }>({ files, folders });
             if (res) {
                 downloadBlob(res.data, 'download.zip');
             }
@@ -98,15 +116,15 @@ const ContextMenu = ({ contextMenu, multi }: {
                 <span className="text-sm">Open</span>
             </button>}
 
-            {(contextMenu.item.type === 'file' && !multi.folderInSelection) && <button
-                onClick={() => multi.isMultiSelection ? handleDownloadAll() : handleDownload()}
+            <button
+                onClick={() => multi.isMultiSelection ? handleDownloadAll() : handleDownloadSingleItem()}
                 className="w-full flex items-center space-x-3 p-1
                  text-gray-700 hover:bg-gray-50 transition-colors 
                  duration-150"
             >
                 <MdOutlineDownload className="w-4 h-4 text-blue-500" />
                 <span className="text-sm">Download {multi.isMultiSelection ? 'All' : ''}</span>
-            </button>}
+            </button>
 
             {/* <div className="h-px bg-gray-100 mx-3" /> */}
 

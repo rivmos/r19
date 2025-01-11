@@ -27,3 +27,12 @@ export const apiUploadFile = async <T, U extends Record<string, unknown>>(data: 
         data
     })
 }
+
+
+export const apiDownloadFolder = async <T, U extends Record<string, unknown>>(params: U) => {
+    return ApiService.fetchData<T>({
+        url:`/folders/download/${params.id}`,
+        method:'get',
+        responseType:'blob'
+    })
+} 
